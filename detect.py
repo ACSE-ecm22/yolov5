@@ -148,6 +148,7 @@ def run(
             p = Path(p)  # to Path
             save_path = str(save_dir / p.name)  # im.jpg
             txt_path = str(save_dir / 'labels' / p.stem) + ('' if dataset.mode == 'image' else f'_{frame}')  # im.txt
+            csv_path = str(save_dir / 'labels' / 'output') + ('' if dataset.mode == 'image' else f'_{frame}')
             s += '%gx%g ' % im.shape[2:]  # print string
             gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
             imc = im0.copy() if save_crop else im0  # for save_crop
@@ -173,8 +174,8 @@ def run(
                     if save_csv:  # Write to file
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                         line = (cls, *xywh, conf) if save_conf else (cls, *xywh)  # label format
-                        data = [x.item() if isinstance(x, torch.Tensor) else x for x in line]
-                        with open(f'{txt_path}.csv', 'a') as g:
+                        data = [p.stem if isinstance(x, torch.Tensor) else x for x in line]
+                        with open(f'{csv_path}.csv', 'a') as g:
                             writer = csv.writer(g)
                             writer.writerow(data)
                             
