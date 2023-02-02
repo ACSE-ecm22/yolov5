@@ -24,6 +24,7 @@ import json
 import os
 import sys
 from pathlib import Path
+import csv
 
 import numpy as np
 import torch
@@ -110,6 +111,7 @@ def run(
         augment=False,  # augmented inference
         verbose=False,  # verbose output
         save_txt=False,  # save results to *.txt
+        save_statistics=False, # save *.csv file for each input image that summarises the TP, TP, FN
         save_hybrid=False,  # save label+prediction hybrid results to *.txt
         save_conf=False,  # save confidences in --save-txt labels
         save_json=False,  # save a COCO-JSON results file
@@ -183,6 +185,16 @@ def run(
 
     seen = 0
     confusion_matrix = ConfusionMatrix(nc=nc)
+
+    if save_statistics:
+        save_path = str(save_dir / 'statistics')
+        statistic = confusion_matrix.tp_fp
+        for element in statistic:
+            with open(f'{save_path}.csv', 'a') as f:
+                writer = csv.writer(f)
+                writer.writerow(element)
+
+
     names = model.names if hasattr(model, 'names') else model.module.names  # get class names
     if isinstance(names, (list, tuple)):  # old format
         names = dict(enumerate(names))
@@ -352,6 +364,7 @@ def parse_opt():
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     parser.add_argument('--verbose', action='store_true', help='report mAP by class')
     parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
+    parser.add_argument('--save-statistics', action='store_true', help='save statistic results to *.csv')
     parser.add_argument('--save-hybrid', action='store_true', help='save label+prediction hybrid results to *.txt')
     parser.add_argument('--save-conf', action='store_true', help='save confidences in --save-txt labels')
     parser.add_argument('--save-json', action='store_true', help='save a COCO-JSON results file')
