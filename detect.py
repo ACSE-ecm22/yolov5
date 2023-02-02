@@ -64,6 +64,7 @@ def run(
         view_img=False,  # show results
         save_txt=False,  # save results to *.txt
         save_csv=False,  # save results to *.csv
+        small_imgs = False, # identify the input 
         save_conf=False,  # save confidences in --save-txt labels
         save_crop=False,  # save cropped prediction boxes
         nosave=False,  # do not save images/videos
@@ -175,9 +176,14 @@ def run(
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                         line = (cls, *xywh, conf) if save_conf else (cls, *xywh)  # label format
                         data = [p.stem if isinstance(x, torch.Tensor) else x for x in line]
-                        with open(f'{csv_path}.csv', 'a') as g:
-                            writer = csv.writer(g)
-                            writer.writerow(data)
+                        if small_imgs:
+                            with open(f'{txt_path}.csv', 'a') as g:
+                                writer = csv.writer(g)
+                                writer.writerow(data)
+                        else:
+                            with open(f'{csv_path}.csv', 'a') as g:
+                                writer = csv.writer(g)
+                                writer.writerow(data)
                             
                         
                     if save_img or save_crop or view_img:  # Add bbox to image
@@ -245,6 +251,7 @@ def parse_opt():
     parser.add_argument('--view-img', action='store_true', help='show results')
     parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
     parser.add_argument('--save-csv', action='store_true', help='save results to *.csv')
+    parser.add_argument('--small-imgs', action='store_true', help='save results to separate *.csv')
     parser.add_argument('--save-conf', action='store_true', help='save confidences in --save-txt labels')
     parser.add_argument('--save-crop', action='store_true', help='save cropped prediction boxes')
     parser.add_argument('--nosave', action='store_true', help='do not save images/videos')
