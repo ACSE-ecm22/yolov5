@@ -186,13 +186,7 @@ def run(
     seen = 0
     confusion_matrix = ConfusionMatrix(nc=nc)
 
-    if save_statistics:
-        save_path = str(save_dir / 'statistics')
-        statistic = confusion_matrix.tp_fp
-        for element in statistic:
-            with open(f'{save_path}.csv', 'a') as f:
-                writer = csv.writer(f)
-                writer.writerow(element)
+
 
 
     names = model.names if hasattr(model, 'names') else model.module.names  # get class names
@@ -272,6 +266,15 @@ def run(
                 save_one_txt(predn, save_conf, shape, file=save_dir / 'labels' / f'{path.stem}.txt')
             if save_json:
                 save_one_json(predn, jdict, path, class_map)  # append to COCO-JSON dictionary
+            if save_statistics:
+                save_path = str(save_dir / 'statistics')
+                statistic = confusion_matrix.tp_fp()
+                # print(statistic)
+
+                for element in statistic:
+                    with open(f'{save_path}.csv', 'a') as f:
+                        writer = csv.writer(f)
+                        writer.writerow(element)
             callbacks.run('on_val_image_end', pred, predn, path, names, im[si])
 
         # Plot images
