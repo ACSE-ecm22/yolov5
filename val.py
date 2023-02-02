@@ -185,8 +185,8 @@ def run(
 
     seen = 0
     confusion_matrix = ConfusionMatrix(nc=nc)
-
-
+    statistic = []
+    save_path = str(save_dir / 'statistics')
 
 
     names = model.names if hasattr(model, 'names') else model.module.names  # get class names
@@ -267,14 +267,9 @@ def run(
             if save_json:
                 save_one_json(predn, jdict, path, class_map)  # append to COCO-JSON dictionary
             if save_statistics:
-                save_path = str(save_dir / 'statistics')
-                statistic = confusion_matrix.tp_fp()
-                # print(statistic)
+                
+                statistic.append(confusion_matrix.tp_fp())
 
-                for element in statistic:
-                    with open(f'{save_path}.csv', 'a') as f:
-                        writer = csv.writer(f)
-                        writer.writerow(element)
             callbacks.run('on_val_image_end', pred, predn, path, names, im[si])
 
         # Plot images
@@ -297,7 +292,14 @@ def run(
     LOGGER.info(pf % ('all', seen, nt.sum(), mp, mr, map50, map))
     if nt.sum() == 0:
         LOGGER.warning(f'WARNING ⚠️ no labels found in {task} set, can not compute metrics without labels')
-
+    if save_statistics:
+        header = ["True Positive", "False Positive", "False Negative"]
+        sum_array = tuple(np.sum(arrays, axis=0) for arrays in zip(*statistic))
+        rows = zip(*sum_array)
+        with open(f'{save_path}.csv', 'a') as f:
+            writer = csv.writer(f)
+            writer.writerow(header)
+            writer.writerows(rows)
     # Print results per class
     if (verbose or (nc < 50 and not training)) and nc > 1 and len(stats):
         for i, c in enumerate(ap_class):
