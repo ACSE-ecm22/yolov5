@@ -111,7 +111,7 @@ def run(
         augment=False,  # augmented inference
         verbose=False,  # verbose output
         save_txt=False,  # save results to *.txt
-        save_statistics=False, # save *.csv file for each input image that summarises the TP, TP, FN
+        save_statistics=True, # save *.csv file for each input image that summarises the TP, TP, FN
         save_hybrid=False,  # save label+prediction hybrid results to *.txt
         save_conf=False,  # save confidences in --save-txt labels
         save_json=False,  # save a COCO-JSON results file
